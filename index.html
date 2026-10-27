@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HKD An Huy Mart - Quản Lý Kho & Bán Hàng</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar Nav -->
+  <aside class="w-full md:w-64 bg-slate-900 text-slate-100 flex-shrink-0 flex flex-col justify-between shadow-xl">
+    <div>
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+            <i class="fa-solid fa-store text-xl"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-base leading-tight tracking-wide text-emerald-400">HKD An Huy Mart</h1>
+            <p class="text-xs text-slate-400">Quản Lý Kho & Bán Hàng</p>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="p-4 space-y-1">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all bg-emerald-600 text-white shadow-md shadow-emerald-600/30">
+          <i class="fa-solid fa-chart-pie w-5"></i>
+          <span>Tổng Quan</span>
+        </button>
+        <button onclick="switchTab('purchase')" id="nav-purchase" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all">
+          <i class="fa-solid fa-truck-ramp-box w-5"></i>
+          <span>Nhập Hàng</span>
+        </button>
+        <button onclick="switchTab('sales')" id="nav-sales" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all">
+          <i class="fa-solid fa-cart-shopping w-5"></i>
+          <span>Xuất Hàng / Bán</span>
+        </button>
+        <button onclick="switchTab('inventory')" id="nav-inventory" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all">
+          <i class="fa-solid fa-boxes-stacked w-5"></i>
+          <span>Quản Lý Tồn Kho</span>
+        </button>
+        <button onclick="switchTab('stocktake')" id="nav-stocktake" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all">
+          <i class="fa-solid fa-clipboard-check w-5"></i>
+          <span>Kiểm Hàng Tồn</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="p-4 border-t border-slate-800">
+      <button onclick="resetData()" class="w-full flex items-center justify-center space-x-2 px-3 py-2 text-xs font-semibold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-lg transition-all">
+        <i class="fa-solid fa-rotate-left"></i>
+        <span>Khôi Phục Mẫu</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto p-4 md:p-8">
+    <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+      <div>
+        <h2 id="page-title" class="text-2xl font-bold text-slate-800">HKD An Huy Mart - Tổng Quan Hệ Thống</h2>
+        <p class="text-sm text-slate-500 mt-1">Hệ thống quản lý nhập xuất tồn và kiểm kê hàng hóa</p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="px-3 py-1 bg-emerald-50 text-emerald-700 font-semibold text-xs rounded-full border border-emerald-200 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> An Huy Mart
+        </span>
+      </div>
+    </header>
+
+    <!-- TAB 1: DASHBOARD -->
+    <section id="tab-dashboard" class="space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4">
+          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+            <i class="fa-solid fa-sack-dollar text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Doanh Thu Xuất Hàng</p>
+            <h3 id="dash-revenue" class="text-xl font-bold text-slate-800 mt-0.5">0 ₫</h3>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4">
+          <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+            <i class="fa-solid fa-cart-flatbed text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Chi Phí Nhập Hàng</p>
+            <h3 id="dash-expenses" class="text-xl font-bold text-slate-800 mt-0.5">0 ₫</h3>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4">
+          <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+            <i class="fa-solid fa-boxes-packing text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Giá Trị Kho Hàng</p>
+            <h3 id="dash-stock-value" class="text-xl font-bold text-slate-800 mt-0.5">0 ₫</h3>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4">
+          <div class="p-3 bg-rose-50 text-rose-600 rounded-xl">
+            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Lệch Kiểm Ke</p>
+            <h3 id="dash-stocktake-diff" class="text-xl font-bold text-slate-800 mt-0.5">0 SP</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center justify-between">
+            <span>Thống Kê Nhập vs Xuất</span>
+            <span class="text-xs font-normal text-slate-400">Tự động cập nhật</span>
+          </h3>
+          <div class="h-64 relative">
+            <canvas id="chart-overview"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center justify-between">
+            <span>Sản Phẩm Cần Nhập</span>
+            <span class="text-xs text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full font-semibold">Tồn ≤ 10</span>
+          </h3>
+          <div id="low-stock-list" class="space-y-3 overflow-y-auto max-h-60 pr-1">
+            <!-- JS Inject -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: NHẬP HÀNG -->
+    <section id="tab-purchase" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-fit">
+          <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100">Tạo Phiếu Nhập Hàng</h3>
+          <form id="form-purchase" onsubmit="handlePurchase(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Sản phẩm</label>
+              <select id="p-product-id" onchange="toggleNewProductInput(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                <!-- JS Populate -->
+              </select>
+            </div>
+
+            <div id="new-product-fields" class="hidden p-3 bg-emerald-50/50 border border-emerald-100 rounded-lg space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-emerald-800 mb-1">Mã Sản Phẩm (SKU)</label>
+                <input type="text" id="p-sku" placeholder="VD: SP005" class="w-full bg-white border border-emerald-200 rounded-md p-2 text-sm outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-emerald-800 mb-1">Tên Sản Phẩm Mới</label>
+                <input type="text" id="p-name" placeholder="Tên sản phẩm..." class="w-full bg-white border border-emerald-200 rounded-md p-2 text-sm outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-emerald-800 mb-1">Đơn vị tính</label>
+                <input type="text" id="p-unit" placeholder="Cái, Hộp, Kg..." class="w-full bg-white border border-emerald-200 rounded-md p-2 text-sm outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Số lượng nhập</label>
+                <input type="number" id="p-qty" min="1" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Đơn giá nhập (VNĐ)</label>
+                <input type="number" id="p-price" min="0" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-emerald-700 mb-1 uppercase">Giá Bán Dự Kiến (VNĐ)</label>
+              <input type="number" id="p-sell-price" min="0" placeholder="Khai báo giá bán để tự động xuất..." class="w-full bg-emerald-50/40 border border-emerald-300 rounded-lg p-2.5 text-sm font-semibold text-emerald-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Nhà cung cấp</label>
+              <input type="text" id="p-supplier" placeholder="Tên nhà cung cấp..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-plus"></i>
+              <span>Lưu Phiếu Nhập</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100">Lịch Sử Nhập Hàng</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="text-xs font-bold text-slate-400 uppercase bg-slate-50 border-y border-slate-100">
+                  <th class="py-3 px-4">Thời Gian</th>
+                  <th class="py-3 px-4">Mã SP / Tên</th>
+                  <th class="py-3 px-4 text-center">SL</th>
+                  <th class="py-3 px-4 text-right">Giá Nhập</th>
+                  <th class="py-3 px-4 text-right">Giá Bán</th>
+                  <th class="py-3 px-4 text-right">Thành Tiền</th>
+                  <th class="py-3 px-4">Nhà Cung Cấp</th>
+                </tr>
+              </thead>
+              <tbody id="table-purchase-history" class="divide-y divide-slate-100 text-sm">
+                <!-- JS Inject -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: XUẤT HÀNG -->
+    <section id="tab-sales" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-fit">
+          <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100">Tạo Phiếu Xuất Hàng (Bán)</h3>
+          <form id="form-sales" onsubmit="handleSales(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Sản phẩm bán</label>
+              <select id="s-product-id" onchange="updateSalesMaxQty()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                <!-- JS Populate -->
+              </select>
+              <p id="s-stock-hint" class="text-xs text-slate-500 mt-1">Tồn kho khả dụng: <span class="font-bold text-slate-700">0</span></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Số lượng xuất</label>
+                <input type="number" id="s-qty" min="1" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Giá bán xuất (VNĐ)</label>
+                <input type="number" id="s-price" min="0" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Khách hàng / Ghi chú</label>
+              <input type="text" id="s-customer" placeholder="Tên khách hàng hoặc ghi chú..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md shadow-blue-600/20 transition-all flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-cart-arrow-down"></i>
+              <span>Xuất Hàng / Bán</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100">Lịch Sử Xuất Hàng</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="text-xs font-bold text-slate-400 uppercase bg-slate-50 border-y border-slate-100">
+                  <th class="py-3 px-4">Thời Gian</th>
+                  <th class="py-3 px-4">Sản Phẩm</th>
+                  <th class="py-3 px-4 text-center">SL</th>
+                  <th class="py-3 px-4 text-right">Đơn Giá Bán</th>
+                  <th class="py-3 px-4 text-right">Thành Tiền</th>
+                  <th class="py-3 px-4">Khách Hàng</th>
+                </tr>
+              </thead>
+              <tbody id="table-sales-history" class="divide-y divide-slate-100 text-sm">
+                <!-- JS Inject -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: TỒN KHO -->
+    <section id="tab-inventory" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+          <div>
+            <h3 class="text-lg font-bold text-slate-800">Báo Cáo Tồn Kho Hiện Tại</h3>
+            <p class="text-xs text-slate-500">Tự động tính: Tồn = Ban đầu + Nhập - Xuất ± Điều chỉnh kiểm kê</p>
+          </div>
+          <div class="w-full sm:w-64">
+            <input type="text" id="inventory-search" oninput="renderInventoryTable()" placeholder="Tìm kiếm sản phẩm..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-xs font-bold text-slate-400 uppercase bg-slate-50 border-y border-slate-100">
+                <th class="py-3 px-4">Mã SKU</th>
+                <th class="py-3 px-4">Tên Sản Phẩm</th>
+                <th class="py-3 px-4">ĐVT</th>
+                <th class="py-3 px-4 text-center">Ban Đầu</th>
+                <th class="py-3 px-4 text-center text-emerald-600">Tổng Nhập</th>
+                <th class="py-3 px-4 text-center text-blue-600">Tổng Xuất</th>
+                <th class="py-3 px-4 text-center font-bold text-slate-800">Tồn Hiện Tại</th>
+                <th class="py-3 px-4 text-right">Giá Nhập</th>
+                <th class="py-3 px-4 text-right font-semibold text-emerald-600">Giá Bán</th>
+                <th class="py-3 px-4 text-right">Giá Trị Tồn</th>
+                <th class="py-3 px-4 text-center">Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody id="table-inventory" class="divide-y divide-slate-100 text-sm">
+              <!-- JS Inject -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: KIỂM HÀNG TỒN (STOCKTAKE) -->
+    <section id="tab-stocktake" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-fit">
+          <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100">Tạo Phiếu Kiểm Kê Kho</h3>
+          <form id="form-stocktake" onsubmit="handleStocktake(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Chọn Sản Phẩm Kiểm Kê</label>
+              <select id="st-product-id" onchange="updateStocktakeSystemQty()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                <!-- JS Populate -->
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div>
+                <span class="block text-xs text-slate-500">Tồn trên máy:</span>
+                <span id="st-system-qty" class="text-base font-bold text-slate-800">0</span>
+              </div>
+              <div>
+                <span class="block text-xs text-slate-500">Người kiểm:</span>
+                <span class="text-xs font-semibold text-slate-700">Chủ / QL Kho</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Số Lượng Thực Tế Kiểm (Đếm)</label>
+              <input type="number" id="st-actual-qty" min="0" placeholder="Nhập số thực tế đếm trong kho..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Lý Do / Ghi Chú Chênh Lệch</label>
+              <input type="text" id="st-note" placeholder="VD: Hàng hỏng, hết hạn, mất mát..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg shadow-md shadow-purple-600/20 transition-all flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-clipboard-check"></i>
+              <span>Lưu Lịch Sử Kiểm Kê</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+            <h3 class="text-lg font-bold text-slate-800">Lịch Sử Kiểm Kê & Cân Bằng Kho</h3>
+            <span class="text-xs text-slate-400">HKD An Huy Mart</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="text-xs font-bold text-slate-400 uppercase bg-slate-50 border-y border-slate-100">
+                  <th class="py-3 px-4">Ngày Kiểm</th>
+                  <th class="py-3 px-4">Sản Phẩm</th>
+                  <th class="py-3 px-4 text-center">Tồn Máy</th>
+                  <th class="py-3 px-4 text-center">Thực Tế</th>
+                  <th class="py-3 px-4 text-center">Chênh Lệch</th>
+                  <th class="py-3 px-4">Ghi Chú</th>
+                  <th class="py-3 px-4 text-center">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="table-stocktake-history" class="divide-y divide-slate-100 text-sm">
+                <!-- JS Inject -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // DATA INITIALIZATION
+    const DEFAULT_PRODUCTS = [
+      { id: '1', sku: 'AHM-01', name: 'Gạo Tám Thái (Túi 5kg)', unit: 'Túi', initialStock: 50, price: 160000, sellPrice: 195000 },
+      { id: '2', sku: 'AHM-02', name: 'Dầu Ăn Neptune (Chai 1L)', unit: 'Chai', initialStock: 30, price: 48000, sellPrice: 56000 },
+      { id: '3', sku: 'AHM-03', name: 'Nước Mắm Nam Ngư 750ml', unit: 'Chai', initialStock: 8, price: 32000, sellPrice: 39000 },
+      { id: '4', sku: 'AHM-04', name: 'Sữa Miến Vinamilk (Lốc 4)', unit: 'Lốc', initialStock: 5, price: 28000, sellPrice: 34000 }
+    ];
+
+    const DEFAULT_PURCHASES = [
+      { id: 'p1', productId: '1', qty: 20, price: 160000, sellPrice: 195000, supplier: 'Kho Gạo An Bình', date: '2026-03-20 09:30' },
+      { id: 'p2', productId: '2', qty: 15, price: 48000, sellPrice: 56000, supplier: 'NPP Bách Hóa Miền Bắc', date: '2026-03-21 14:15' }
+    ];
+
+    const DEFAULT_SALES = [
+      { id: 's1', productId: '1', qty: 5, price: 195000, customer: 'Khách lẻ - Anh Minh', date: '2026-03-22 10:05' },
+      { id: 's2', productId: '2', qty: 2, price: 56000, customer: 'Khách quen', date: '2026-03-22 11:20' }
+    ];
+
+    const DEFAULT_STOCKTAKES = [
+      { id: 'st1', productId: '3', systemQty: 10, actualQty: 8, diffQty: -2, note: 'Hàng bị rò rỉ nắp', status: 'adjusted', date: '2026-03-23 16:00' }
+    ];
+
+    let products = JSON.parse(localStorage.getItem('ahm_products')) || DEFAULT_PRODUCTS;
+    let purchases = JSON.parse(localStorage.getItem('ahm_purchases')) || DEFAULT_PURCHASES;
+    let sales = JSON.parse(localStorage.getItem('ahm_sales')) || DEFAULT_SALES;
+    let stocktakes = JSON.parse(localStorage.getItem('ahm_stocktakes')) || DEFAULT_STOCKTAKES;
+
+    let overviewChart = null;
+
+    function saveData() {
+      localStorage.setItem('ahm_products', JSON.stringify(products));
+      localStorage.setItem('ahm_purchases', JSON.stringify(purchases));
+      localStorage.setItem('ahm_sales', JSON.stringify(sales));
+      localStorage.setItem('ahm_stocktakes', JSON.stringify(stocktakes));
+    }
+
+    function resetData() {
+      if (confirm('Bạn có chắc chắn muốn khôi phục dữ liệu mẫu ban đầu cho HKD An Huy Mart không?')) {
+        localStorage.removeItem('ahm_products');
+        localStorage.removeItem('ahm_purchases');
+        localStorage.removeItem('ahm_sales');
+        localStorage.removeItem('ahm_stocktakes');
+        products = DEFAULT_PRODUCTS;
+        purchases = DEFAULT_PURCHASES;
+        sales = DEFAULT_SALES;
+        stocktakes = DEFAULT_STOCKTAKES;
+        saveData();
+        initApp();
+      }
+    }
+
+    // HELPER CALCULATIONS
+    function getProductCalculATEDStock(productId) {
+      const prod = products.find(p => p.id === productId);
+      if (!prod) return 0;
+
+      const totalPurchased = purchases
+        .filter(p => p.productId === productId)
+        .reduce((sum, item) => sum + item.qty, 0);
+
+      const totalSold = sales
+        .filter(s => s.productId === productId)
+        .reduce((sum, item) => sum + item.qty, 0);
+
+      const totalAdjustment = stocktakes
+        .filter(st => st.productId === productId && st.status === 'adjusted')
+        .reduce((sum, item) => sum + item.diffQty, 0);
+
+      return prod.initialStock + totalPurchased - totalSold + totalAdjustment;
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    }
+
+    function getFormattedDate() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    // TAB NAVIGATION
+    function switchTab(tabId) {
+      ['dashboard', 'purchase', 'sales', 'inventory', 'stocktake'].forEach(id => {
+        const tabEl = document.getElementById(`tab-${id}`);
+        const navEl = document.getElementById(`nav-${id}`);
+        
+        if (id === tabId) {
+          tabEl.classList.remove('hidden');
+          navEl.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all bg-emerald-600 text-white shadow-md shadow-emerald-600/30";
+        } else {
+          tabEl.classList.add('hidden');
+          navEl.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all";
+        }
+      });
+
+      const titles = {
+        'dashboard': 'HKD An Huy Mart - Tổng Quan Hệ Thống',
+        'purchase': 'Quản Lý Nhập Hàng - An Huy Mart',
+        'sales': 'Quản Lý Xuất Hàng / Bán Hàng - An Huy Mart',
+        'inventory': 'Báo Cáo Tồn Kho Realtime - An Huy Mart',
+        'stocktake': 'Kiểm Hàng Tồn Kho & Cân Bằng Kho - An Huy Mart'
+      };
+      document.getElementById('page-title').innerText = titles[tabId];
+
+      if (tabId === 'dashboard') updateDashboard();
+      if (tabId === 'purchase') renderPurchaseTab();
+      if (tabId === 'sales') renderSalesTab();
+      if (tabId === 'inventory') renderInventoryTable();
+      if (tabId === 'stocktake') renderStocktakeTab();
+    }
+
+    // RENDER PROCEDURES
+    function updateDashboard() {
+      const totalRevenue = sales.reduce((sum, s) => sum + (s.qty * s.price), 0);
+      const totalExpenses = purchases.reduce((sum, p) => sum + (p.qty * p.price), 0);
+      
+      let totalStockValue = 0;
+      let lowStockCount = 0;
+      const lowStockItems = [];
+
+      products.forEach(p => {
+        const currentStock = getProductCalculATEDStock(p.id);
+        totalStockValue += (currentStock * p.price);
+        if (currentStock <= 10) {
+          lowStockCount++;
+          lowStockItems.push({ name: p.name, stock: currentStock, unit: p.unit });
+        }
+      });
+
+      const totalDiff = stocktakes.reduce((sum, st) => sum + Math.abs(st.diffQty), 0);
+
+      document.getElementById('dash-revenue').innerText = formatCurrency(totalRevenue);
+      document.getElementById('dash-expenses').innerText = formatCurrency(totalExpenses);
+      document.getElementById('dash-stock-value').innerText = formatCurrency(totalStockValue);
+      document.getElementById('dash-stocktake-diff').innerText = `${totalDiff} SP`;
+
+      // Low stock list
+      const lowStockContainer = document.getElementById('low-stock-list');
+      if (lowStockItems.length === 0) {
+        lowStockContainer.innerHTML = `<p class="text-xs text-slate-400 italic">Kho hàng đang ở trạng thái an toàn.</p>`;
+      } else {
+        lowStockContainer.innerHTML = lowStockItems.map(item => `
+          <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <div>
+              <p class="text-xs font-bold text-slate-700">${item.name}</p>
+              <p class="text-[10px] text-slate-400">Cần bổ sung ngay</p>
+            </div>
+            <span class="px-2 py-1 bg-rose-100 text-rose-700 font-bold text-xs rounded-md">
+              Tồn: ${item.stock} ${item.unit}
+            </span>
+          </div>
+        `).join('');
+      }
+
+      // Render Chart
+      renderOverviewChart(totalRevenue, totalExpenses, totalStockValue);
+    }
+
+    function renderOverviewChart(revenue, expenses, stockVal) {
+      const ctx = document.getElementById('chart-overview').getContext('2d');
+      if (overviewChart) overviewChart.destroy();
+
+      overviewChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Tổng Doanh Thu', 'Chi Phí Nhập', 'Giá Trị Tồn Kho'],
+          datasets: [{
+            label: 'Giá trị (VNĐ)',
+            data: [revenue, expenses, stockVal],
+            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    // PURCHASE TAB LOGIC
+    function renderPurchaseTab() {
+      const select = document.getElementById('p-product-id');
+      select.innerHTML = `
+        <option value="">-- Chọn sản phẩm có sẵn --</option>
+        ${products.map(p => `<option value="${p.id}">[${p.sku}] ${p.name}</option>`).join('')}
+        <option value="NEW">+ Thêm Sản Phẩm Mới Vào Danh Mục</option>
+      `;
+
+      const tbody = document.getElementById('table-purchase-history');
+      tbody.innerHTML = purchases.map(p => {
+        const prod = products.find(item => item.id === p.productId) || { name: 'Đã xóa', sku: 'N/A' };
+        return `
+          <tr class="hover:bg-slate-50/50">
+            <td class="py-3 px-4 text-xs text-slate-500">${p.date}</td>
+            <td class="py-3 px-4 font-semibold text-slate-800">[${prod.sku}] ${prod.name}</td>
+            <td class="py-3 px-4 text-center font-bold text-emerald-600">+${p.qty}</td>
+            <td class="py-3 px-4 text-right">${formatCurrency(p.price)}</td>
+            <td class="py-3 px-4 text-right font-medium text-emerald-700">${formatCurrency(p.sellPrice || 0)}</td>
+            <td class="py-3 px-4 text-right font-bold text-slate-800">${formatCurrency(p.qty * p.price)}</td>
+            <td class="py-3 px-4 text-slate-600">${p.supplier}</td>
+          </tr>
+        `;
+      }).reverse().join('');
+    }
+
+    function toggleNewProductInput(val) {
+      const container = document.getElementById('new-product-fields');
+      const skuInput = document.getElementById('p-sku');
+      const nameInput = document.getElementById('p-name');
+      const unitInput = document.getElementById('p-unit');
+
+      if (val === 'NEW') {
+        container.classList.remove('hidden');
+        skuInput.required = true;
+        nameInput.required = true;
+        unitInput.required = true;
+      } else {
+        container.classList.add('hidden');
+        skuInput.required = false;
+        nameInput.required = false;
+        unitInput.required = false;
+
+        const prod = products.find(p => p.id === val);
+        if (prod) {
+          document.getElementById('p-price').value = prod.price;
+          document.getElementById('p-sell-price').value = prod.sellPrice || '';
+        }
+      }
+    }
+
+    function handlePurchase(e) {
+      e.preventDefault();
+      const productId = document.getElementById('p-product-id').value;
+      const qty = parseInt(document.getElementById('p-qty').value);
+      const price = parseFloat(document.getElementById('p-price').value);
+      const sellPrice = parseFloat(document.getElementById('p-sell-price').value);
+      const supplier = document.getElementById('p-supplier').value;
+
+      let targetProductId = productId;
+
+      if (productId === 'NEW') {
+        const newSku = document.getElementById('p-sku').value.trim();
+        const newName = document.getElementById('p-name').value.trim();
+        const newUnit = document.getElementById('p-unit').value.trim();
+        targetProductId = Date.now().toString();
+
+        products.push({
+          id: targetProductId,
+          sku: newSku,
+          name: newName,
+          unit: newUnit,
+          initialStock: 0,
+          price: price,
+          sellPrice: sellPrice
+        });
+      } else {
+        const prodIndex = products.findIndex(p => p.id === productId);
+        if (prodIndex !== -1) {
+          products[prodIndex].price = price;
+          products[prodIndex].sellPrice = sellPrice;
+        }
+      }
+
+      purchases.push({
+        id: 'p' + Date.now(),
+        productId: targetProductId,
+        qty: qty,
+        price: price,
+        sellPrice: sellPrice,
+        supplier: supplier,
+        date: getFormattedDate()
+      });
+
+      saveData();
+      alert('Tạo phiếu nhập hàng thành công!');
+      document.getElementById('form-purchase').reset();
+      toggleNewProductInput('');
+      renderPurchaseTab();
+    }
+
+    // SALES TAB LOGIC
+    function renderSalesTab() {
+      const select = document.getElementById('s-product-id');
+      select.innerHTML = `
+        <option value="">-- Chọn sản phẩm xuất bán --</option>
+        ${products.map(p => `<option value="${p.id}">[${p.sku}] ${p.name}</option>`).join('')}
+      `;
+
+      const tbody = document.getElementById('table-sales-history');
+      tbody.innerHTML = sales.map(s => {
+        const prod = products.find(item => item.id === s.productId) || { name: 'Đã xóa' };
+        return `
+          <tr class="hover:bg-slate-50/50">
+            <td class="py-3 px-4 text-xs text-slate-500">${s.date}</td>
+            <td class="py-3 px-4 font-semibold text-slate-800">${prod.name}</td>
+            <td class="py-3 px-4 text-center font-bold text-blue-600">-${s.qty}</td>
+            <td class="py-3 px-4 text-right">${formatCurrency(s.price)}</td>
+            <td class="py-3 px-4 text-right font-bold text-slate-800">${formatCurrency(s.qty * s.price)}</td>
+            <td class="py-3 px-4 text-slate-600">${s.customer || 'Khách lẻ'}</td>
+          </tr>
+        `;
+      }).reverse().join('');
+    }
+
+    function updateSalesMaxQty() {
+      const productId = document.getElementById('s-product-id').value;
+      if (!productId) return;
+      
+      const currentStock = getProductCalculATEDStock(productId);
+      const prod = products.find(p => p.id === productId);
+
+      document.getElementById('s-stock-hint').innerHTML = `Tồn kho khả dụng: <span class="font-bold text-emerald-600">${currentStock}</span> ${prod ? prod.unit : ''}`;
+      document.getElementById('s-qty').max = currentStock;
+      
+      if (prod && prod.sellPrice) {
+        document.getElementById('s-price').value = prod.sellPrice;
+      } else if (prod) {
+        document.getElementById('s-price').value = prod.price;
+      }
+    }
+
+    function handleSales(e) {
+      e.preventDefault();
+      const productId = document.getElementById('s-product-id').value;
+      const qty = parseInt(document.getElementById('s-qty').value);
+      const price = parseFloat(document.getElementById('s-price').value);
+      const customer = document.getElementById('s-customer').value;
+
+      const currentStock = getProductCalculATEDStock(productId);
+      if (qty > currentStock) {
+        alert('Số lượng xuất vượt quá số lượng tồn kho hiện tại!');
+        return;
+      }
+
+      sales.push({
+        id: 's' + Date.now(),
+        productId: productId,
+        qty: qty,
+        price: price,
+        customer: customer,
+        date: getFormattedDate()
+      });
+
+      saveData();
+      alert('Tạo phiếu xuất hàng thành công!');
+      document.getElementById('form-sales').reset();
+      renderSalesTab();
+    }
+
+    // INVENTORY TAB LOGIC
+    function renderInventoryTable() {
+      const searchTerm = document.getElementById('inventory-search').value.toLowerCase();
+      const tbody = document.getElementById('table-inventory');
+
+      const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm) || p.sku.toLowerCase().includes(searchTerm));
+
+      tbody.innerHTML = filtered.map(p => {
+        const totalPurchased = purchases.filter(item => item.productId === p.id).reduce((sum, item) => sum + item.qty, 0);
+        const totalSold = sales.filter(item => item.productId === p.id).reduce((sum, item) => sum + item.qty, 0);
+        const currentStock = getProductCalculATEDStock(p.id);
+        const stockValue = currentStock * p.price;
+
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">An Toàn</span>`;
+        if (currentStock <= 0) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700">Hết Hàng</span>`;
+        } else if (currentStock <= 10) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700">Sắp Hết</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50/50">
+            <td class="py-3 px-4 font-mono text-xs text-slate-500">${p.sku}</td>
+            <td class="py-3 px-4 font-bold text-slate-800">${p.name}</td>
+            <td class="py-3 px-4 text-xs text-slate-500">${p.unit}</td>
+            <td class="py-3 px-4 text-center text-slate-500">${p.initialStock}</td>
+            <td class="py-3 px-4 text-center font-medium text-emerald-600">+${totalPurchased}</td>
+            <td class="py-3 px-4 text-center font-medium text-blue-600">-${totalSold}</td>
+            <td class="py-3 px-4 text-center font-extrabold text-base text-slate-800">${currentStock}</td>
+            <td class="py-3 px-4 text-right text-slate-600">${formatCurrency(p.price)}</td>
+            <td class="py-3 px-4 text-right font-bold text-emerald-600">${formatCurrency(p.sellPrice || 0)}</td>
+            <td class="py-3 px-4 text-right font-bold text-slate-800">${formatCurrency(stockValue)}</td>
+            <td class="py-3 px-4 text-center">${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // STOCKTAKE TAB LOGIC
+    function renderStocktakeTab() {
+      const select = document.getElementById('st-product-id');
+      select.innerHTML = `
+        <option value="">-- Chọn sản phẩm kiểm kê --</option>
+        ${products.map(p => `<option value="${p.id}">[${p.sku}] ${p.name}</option>`).join('')}
+      `;
+
+      const tbody = document.getElementById('table-stocktake-history');
+      tbody.innerHTML = stocktakes.map(st => {
+        const prod = products.find(p => p.id === st.productId) || { name: 'Đã xóa' };
+        const diffFormatted = st.diffQty > 0 ? `+${st.diffQty}` : st.diffQty;
+        const diffColor = st.diffQty === 0 ? 'text-slate-500' : (st.diffQty > 0 ? 'text-emerald-600' : 'text-rose-600');
+
+        return `
+          <tr class="hover:bg-slate-50/50">
+            <td class="py-3 px-4 text-xs text-slate-500">${st.date}</td>
+            <td class="py-3 px-4 font-semibold text-slate-800">${prod.name}</td>
+            <td class="py-3 px-4 text-center text-slate-600">${st.systemQty}</td>
+            <td class="py-3 px-4 text-center font-bold text-slate-800">${st.actualQty}</td>
+            <td class="py-3 px-4 text-center font-extrabold ${diffColor}">${diffFormatted}</td>
+            <td class="py-3 px-4 text-xs text-slate-500">${st.note || '-'}</td>
+            <td class="py-3 px-4 text-center">
+              ${st.status === 'adjusted' 
+                ? `<span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs rounded border border-emerald-200">Đã cân bằng</span>`
+                : `<button onclick="applyAdjustment('${st.id}')" class="px-2 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 shadow-sm">Cân Bằng Kho</button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).reverse().join('');
+    }
+
+    function updateStocktakeSystemQty() {
+      const productId = document.getElementById('st-product-id').value;
+      if (!productId) return;
+      const currentStock = getProductCalculATEDStock(productId);
+      document.getElementById('st-system-qty').innerText = currentStock;
+    }
+
+    function handleStocktake(e) {
+      e.preventDefault();
+      const productId = document.getElementById('st-product-id').value;
+      const actualQty = parseInt(document.getElementById('st-actual-qty').value);
+      const note = document.getElementById('st-note').value;
+
+      const systemQty = getProductCalculATEDStock(productId);
+      const diffQty = actualQty - systemQty;
+
+      stocktakes.push({
+        id: 'st' + Date.now(),
+        productId: productId,
+        systemQty: systemQty,
+        actualQty: actualQty,
+        diffQty: diffQty,
+        note: note,
+        status: 'adjusted', // Tự động cân bằng kho ngay
+        date: getFormattedDate()
+      });
+
+      saveData();
+      alert('Đã ghi nhận kiểm kê và cân bằng tồn kho!');
+      document.getElementById('form-stocktake').reset();
+      document.getElementById('st-system-qty').innerText = '0';
+      renderStocktakeTab();
+    }
+
+    function applyAdjustment(stId) {
+      const index = stocktakes.findIndex(st => st.id === stId);
+      if (index !== -1) {
+        stocktakes[index].status = 'adjusted';
+        saveData();
+        renderStocktakeTab();
+      }
+    }
+
+    // INITIALIZATION
+    function initApp() {
+      updateDashboard();
+    }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
